@@ -1,13 +1,11 @@
 import sys
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import (
     QApplication, QWidget, 
     QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, 
-    QFileDialog, QLineEdit,
+    QLineEdit,QMessageBox,
 )
-from PyQt5.QtGui import QPixmap, QImage
-import numpy as np
-import cv2
 
 from event_handler import *
 
@@ -20,51 +18,79 @@ class GUI(QWidget):
         self.model_path = None  # 모델 경로
 
         self.initUI()
-        self.gradcam = GradCAMPipeline()
+        self.gradcam_pipeline = GradCAMPipeline()
         # self.upload_image()
         
     def initUI(self):
+        # TODO
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        
         self.setGeometry(500, 500, 1240, 500)
-        self.setWindowTitle('Grad CAM Output GUI')
-        self.setStyleSheet("background-color: #213421;")
+        # self.setWindowTitle('Grad CAM Output GUI')
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #262626;
+                color: #FFFFFF;
+            }
+
+            QLabel {
+                border: 1px solid #FFFFFF;
+            }
+
+            QPushButton {
+                background-color: #373737;
+                color: #FFFFFF;
+                border: 1px solid #FFFFFF;
+                padding: 5px;
+            }
+
+            QPushButton:hover {
+                background-color: #4D4D4D;
+            }
+
+            QLineEdit {
+                background-color: #373737;
+                color: #FFFFFF;
+                border: 1px solid #FFFFFF;
+            }
+
+        """)
+        
+        # TODO : title bar
+        vmain_frame = QVBoxLayout(self)
+        vmain_frame.setContentsMargins(0, 0, 0, 0)
+        # title_bar = TitleBar(self)
+        # vmain_frame.addWidget(title_bar)
         
         # 이미지 업로드 버튼
         self.upload_btn = QPushButton('이미지 업로드', self)
-        self.upload_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.upload_btn.clicked.connect(lambda : upload_image(self))
         
         # 결과 버튼
         self.result_btn = QPushButton('결과', self)
-        self.result_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.result_btn.clicked.connect(lambda : show_result(self))
         
         # 이미지 출력을 위한 QLabel 위젯
         self.original_image_label = QLabel(self)
         self.original_image_label.setFixedSize(500, 500)
-        self.original_image_label.setStyleSheet('border: 1px solid #FFFFFF;')
         
         self.gradcam_image_label = QLabel(self)
         self.gradcam_image_label.setFixedSize(500, 500)
-        self.gradcam_image_label.setStyleSheet('border: 1px solid #FFFFFF;')
         
         # 저장된 모델 경로 입력 위젯
         self.model_load_text = QLineEdit()
         self.model_load_text.setFixedSize(600,30)
-        self.model_load_text.setStyleSheet('border: 1px solid #FFFFFF; color: #FFFFFF;')
         # model path upload 버튼
         self.model_load_btn = QPushButton('모델 선택',self)
         self.model_load_btn.setFixedWidth(100)
-        self.model_load_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.model_load_btn.clicked.connect(lambda : upload_model(self))
         # submit 버튼
         self.model_submit_btn = QPushButton('적용')
         self.model_submit_btn.setFixedWidth(100)
-        self.model_submit_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.model_submit_btn.clicked.connect(lambda : apply_model(self))
         # 초기화 버튼
         self.model_clear_btn = QPushButton('초기화')
         self.model_clear_btn.setFixedWidth(100)
-        self.model_clear_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.model_clear_btn.clicked.connect(lambda : clear_text(self))
         # 현재 모델 표시 텍스트
         self.model_name_text = QLineEdit()
@@ -104,9 +130,98 @@ class GUI(QWidget):
         vbox.addLayout(hbox_btn)
         vbox.addLayout(hbox_img)
         vbox.addLayout(vbox_model)
+        vmain_frame.addLayout(vbox)
+
+        self.setLayout(vmain_frame)
+        
+        # msg box
+        self.msg_box = QMessageBox()
+        self.msg_box.setGeometry(500, 500, 1240, 500)
+        self.msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #262626;
+                color: #FFFFFF;
+                border: None;
+            }
+
+            QMessageBox QLabel {
+                color: #FFFFFF; 
+            }
+
+            QMessageBox QPushButton {
+                background-color: #373737;
+                color: #FFFFFF;
+                border: 1px solid #FFFFFF;
+                padding: 5px;
+            }
+
+            QMessageBox QPushButton:hover {
+                background-color: #4D4D4D;
+            }
+            """)
+
+# TODO
+class TitleBar(QWidget):
+    qss = """
+        QWidget#ww {
+            background-color: #C8BFE7;
+            color: #FFFFFF;
+            padding: 12px;
+        }
+        QLabel {
+            background-color: #373737;
+            color: #FFFFFF;
+            padding: 12px;
+        }
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("windowTitle")
+        # self.setStyleSheet(self.qss)
+        # self.setStyleSheet("background-color: #373737;border: none")
+        
+        # 레이아웃과 타이틀바 위젯 생성
+        layout_container = QWidget()
+        # layout_container.setStyleSheet("background-color: #C8BFE7;")
+        layout_container.setObjectName('ww')
+        vbox = QVBoxLayout(layout_container)
+        
+        hbox = QHBoxLayout(self)
+        hbox.setContentsMargins(0, 0, 0, 0)
+
+        # 타이틀 레이블 생성
+        self.title_label = QLabel("Grad CAM Output GUI")
+        hbox.addWidget(self.title_label)
+        hbox.addStretch()
+
+        # 닫기 버튼 생성
+        self.close_button = QPushButton(" X ")
+        hbox.addWidget(self.close_button)
+
+        # 닫기 버튼 클릭 시 이벤트 연결
+        self.close_button.clicked.connect(self.parentWidget().close)
+        self.mouse_pressed = False
+        self.old_pos = None
+
+        vbox.addLayout(hbox)
         self.setLayout(vbox)
+        
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.mouse_pressed = True
+            self.old_pos = event.pos()
 
+    def mouseReleaseEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.mouse_pressed = False
 
+    def mouseMoveEvent(self, event):
+        if self.mouse_pressed and self.old_pos:
+            delta = event.pos() - self.old_pos
+            self.parentWidget().move(self.parentWidget().pos() + delta)
+
+      
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     gui = GUI()

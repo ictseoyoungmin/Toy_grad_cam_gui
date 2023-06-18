@@ -8,16 +8,22 @@ from gradcam import GradCam
 class GradCAMPipeline:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = self.load_model()
-        self.transform = self.get_transform()
+        self.model = self.load_model_test()
+        self.transform = self._transform()
         
-    def load_model(self):
+    def load_model_test(self):
         model = resnet50(pretrained=True)
         model.to(self.device)
         model.eval()
         return model
+    
+    def load_model(self,model_path):
+        model = torch.load(model_path,map_location='cpu')
+        model.to(self.device)
+        model.eval()
+        self.model = model
         
-    def get_transform(self):
+    def _transform(self):
         transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
@@ -37,8 +43,6 @@ class GradCAMPipeline:
         return image_tensor
     
     def visualize_gradcam_test(self,image_path, gradcam):
-        import numpy as np
-        import cv2
         import matplotlib.pyplot as plt
         
         if isinstance(image_path, np.ndarray):
@@ -62,7 +66,7 @@ class GradCAMPipeline:
         plt.savefig('test.jpg')
 
         
-    def run_pipeline(self, image_path):
+    def run(self, image_path):
         image_tensor = self.process_image(image_path)
         
         # class 매핑
