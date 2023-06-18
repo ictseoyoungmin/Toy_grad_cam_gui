@@ -26,56 +26,65 @@ class GUI(QWidget):
     def initUI(self):
         self.setGeometry(500, 500, 1240, 500)
         self.setWindowTitle('Grad CAM Output GUI')
+        self.setStyleSheet("background-color: #213421;")
         
         # 이미지 업로드 버튼
         self.upload_btn = QPushButton('이미지 업로드', self)
+        self.upload_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.upload_btn.clicked.connect(lambda : upload_image(self))
         
         # 결과 버튼
         self.result_btn = QPushButton('결과', self)
+        self.result_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.result_btn.clicked.connect(lambda : show_result(self))
         
         # 이미지 출력을 위한 QLabel 위젯
         self.original_image_label = QLabel(self)
-        self.original_image_label.setFixedSize(400, 400)
-        self.original_image_label.setStyleSheet('border: 1px solid black')
+        self.original_image_label.setFixedSize(500, 500)
+        self.original_image_label.setStyleSheet('border: 1px solid #FFFFFF;')
         
         self.gradcam_image_label = QLabel(self)
-        self.gradcam_image_label.setFixedSize(400, 400)
-        self.gradcam_image_label.setStyleSheet('border: 1px solid black')
+        self.gradcam_image_label.setFixedSize(500, 500)
+        self.gradcam_image_label.setStyleSheet('border: 1px solid #FFFFFF;')
         
         # 저장된 모델 경로 입력 위젯
         self.model_load_text = QLineEdit()
         self.model_load_text.setFixedSize(600,30)
-        self.model_load_text.setStyleSheet('border: 1px solid black')
+        self.model_load_text.setStyleSheet('border: 1px solid #FFFFFF; color: #FFFFFF;')
         # model path upload 버튼
         self.model_load_btn = QPushButton('모델 선택',self)
         self.model_load_btn.setFixedWidth(100)
+        self.model_load_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.model_load_btn.clicked.connect(lambda : upload_model(self))
         # submit 버튼
         self.model_submit_btn = QPushButton('적용')
         self.model_submit_btn.setFixedWidth(100)
+        self.model_submit_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.model_submit_btn.clicked.connect(lambda : apply_model(self))
         # 초기화 버튼
         self.model_clear_btn = QPushButton('초기화')
         self.model_clear_btn.setFixedWidth(100)
+        self.model_clear_btn.setStyleSheet("background-color: #757575; color: #FFFFFF;")
         self.model_clear_btn.clicked.connect(lambda : clear_text(self))
         # 현재 모델 표시 텍스트
         self.model_name_text = QLineEdit()
         self.model_name_text.setText("current model : ")
         self.model_name_text.setEnabled(False)
-        self.model_name_text.setStyleSheet("border: none")
+        self.model_name_text.setStyleSheet("color: #FFFFFF;border: none")
         
         # 레이아웃 설정
         # 전체
         vbox = QVBoxLayout()
+        vbox.setContentsMargins(20, 20, 20, 20)
         # 상단 버튼
         hbox_btn = QHBoxLayout()
         # 이미지 배치
         hbox_img = QHBoxLayout()
+        hbox_img.setContentsMargins(20, 20, 20, 50)
         # 모델 업로드 텍스트
         vbox_model = QVBoxLayout()
         hbox_model_path = QHBoxLayout() # pytorch model.pth address
+        hbox_model_path.setContentsMargins(20, 20, 20, 50)
         
         
         hbox_btn.addWidget(self.upload_btn)
