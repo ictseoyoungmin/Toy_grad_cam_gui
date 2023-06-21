@@ -3,3 +3,8 @@ __pycache__
 *.pth
 *.pt
 *.pkl
+build
+dist
+*.exe
+*.zip
+*.spec

@@ -17,7 +17,7 @@ def upload_image(gui):
 
 def show_result(gui):
     if checkModelPath(gui):
-        result = gui.gradcam_pipeline.run(gui.file_path)
+        result,prob,cls = gui.gradcam_pipeline.run(gui.file_path)
         result = (result * 255).astype(np.uint8)
         gc_jet = cv2.applyColorMap(result, cv2.COLORMAP_JET)
         
@@ -26,6 +26,10 @@ def show_result(gui):
         blended = cv2.addWeighted(gui.ori_image, 1- alpha, gradcam_jet_resized, alpha, 0)
 
         plot_qimage(blended,gui.gradcam_image_label)
+        plot_text_prob(gui.gc_result_cls,prob,cls)
+
+def plot_text_prob(qlabel,prob,cls):
+    qlabel.setText(f'{prob*100:.1f}% {cls} class')
 
 def upload_model(gui):
     file_dialog = QFileDialog()
@@ -34,6 +38,12 @@ def upload_model(gui):
     if file_path:
         setModelPath(gui,file_path)
 
+def upload_json(gui):
+    file_dialog = QFileDialog()
+    file_path, _ = file_dialog.getOpenFileName(gui, 'json 업로드', '', 'Json(*.json)')
+    if file_path:
+        setJson(gui,file_path)
+        
 def apply_model(gui):
     if gui.model_load_text.isModified():
         setModelPath(gui,gui.model_load_text.text())
@@ -87,6 +97,19 @@ def setModelPath(gui,file_path):
     gui.model_load_text.setText(file_path)
     gui.model_path = file_path
 
+def setJson(gui,file_path):
+    import json
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+
+    class_dict = {}
+    for key, value in data.items():
+        class_dict[key] = value[1]
+
+    print(class_dict)
+    gui.gradcam_pipeline.class_dict = class_dict
+    gui.load_json_btn.setText('Json 불러오기 [o]')
+    
 def clearModelPath(gui):
     gui.model_name_text.setText('current model : ')
     gui.model_path = None

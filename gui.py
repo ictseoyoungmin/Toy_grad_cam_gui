@@ -81,7 +81,7 @@ class GUI(QWidget):
         self.model_load_text = QLineEdit()
         self.model_load_text.setFixedSize(600,30)
         # model path upload 버튼
-        self.model_load_btn = QPushButton('모델 선택',self)
+        self.model_load_btn = QPushButton('모델 선택')
         self.model_load_btn.setFixedWidth(100)
         self.model_load_btn.clicked.connect(lambda : upload_model(self))
         # submit 버튼
@@ -107,17 +107,34 @@ class GUI(QWidget):
         # 이미지 배치
         hbox_img = QHBoxLayout()
         hbox_img.setContentsMargins(20, 20, 20, 50)
+        # gradcam , result        
+        vbox_gradcam = QVBoxLayout()
+        vbox_ori_img = QVBoxLayout()
+        # grad cam result text 출력
+        self.gc_result_cls = QLabel()
+        self.gc_result_cls.setFixedSize(500,50)
+        self.gc_result_cls.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        self.load_json_btn = QPushButton('Json 불러오기 [x]')
+        self.load_json_btn.clicked.connect(lambda : upload_json(self))
+        self.load_json_btn.setFixedSize(500,50)
+        # self.original_image_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        # self.gradcam_image_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        
         # 모델 업로드 텍스트
         vbox_model = QVBoxLayout()
         hbox_model_path = QHBoxLayout() # pytorch model.pth address
         hbox_model_path.setContentsMargins(20, 20, 20, 50)
         
-        
         hbox_btn.addWidget(self.upload_btn)
         hbox_btn.addWidget(self.result_btn)
         
-        hbox_img.addWidget(self.original_image_label)
-        hbox_img.addWidget(self.gradcam_image_label)
+        vbox_ori_img.addWidget(self.original_image_label)
+        vbox_ori_img.addWidget(self.load_json_btn)
+        vbox_gradcam.addWidget(self.gradcam_image_label)
+        vbox_gradcam.addWidget(self.gc_result_cls)
+        
+        hbox_img.addLayout(vbox_ori_img)
+        hbox_img.addLayout(vbox_gradcam)
         
         hbox_model_path.addWidget(self.model_load_btn)
         hbox_model_path.addWidget(self.model_load_text)

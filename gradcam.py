@@ -52,7 +52,7 @@ class GradCam:
         one_hot[0][torch.argmax(output)] = 1.0
         
         output.backward(gradient=one_hot)
-        print(f'debug : class :{[torch.argmax(output)]}')
+        # print(f'debug : class :{[torch.argmax(output)]}')
         
     def generate_gradcam(self, input_tensor):
         self.model.zero_grad()
@@ -71,7 +71,9 @@ class GradCam:
         gradcam = cv2.resize(gradcam, (224, 224))
         gradcam = (gradcam - np.min(gradcam)) / (np.max(gradcam) - np.min(gradcam) + 1e-7)
 
-        return gradcam
+        prob = nn.functional.softmax(output).detach()
+        cls = torch.argmax(prob)
+        return gradcam,prob[0][cls].item(),cls.item()
 
 def visualize_gradcam(image_path, gradcam):
     image = np.array(Image.open(image_path))
@@ -141,6 +143,6 @@ if __name__ == "__main__":
     image_path = r"C:\Users\201721360\PythonWork\pytorch_serving\example.jpg"  # 이미지 경로를 적절히 지정
     
     image_tensor = process_image(image_path)
-    gradcam = pipeline.generate_gradcam(image_tensor)
+    gradcam,_,_ = pipeline.generate_gradcam(image_tensor)
     
     visualize_gradcam_test(image_path, gradcam)

@@ -8,8 +8,9 @@ from gradcam import GradCam
 class GradCAMPipeline:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = self.load_model_test()
+        self.model = None
         self.transform = self._transform()
+        self.class_dict = None
         
     def load_model_test(self):
         model = resnet50(pretrained=True)
@@ -69,18 +70,16 @@ class GradCAMPipeline:
     def run(self, image_path):
         image_tensor = self.process_image(image_path)
         
-        # class 매핑
-        # 여기서 class 매핑을 수행하는 코드를 작성
-        
         # Grad-CAM 결과 생성
         gradcam = GradCam(self.model,-1)
-        gradcam_result = gradcam.generate_gradcam(image_tensor)
-        
-        # 결과 출력
-        # 여기서 Grad-CAM 결과를 출력하는 코드를 작성
+        gradcam_result, prob, cls = gradcam.generate_gradcam(image_tensor)
         
         # self.visualize_gradcam_test(image_path, gradcam_result)
-        return gradcam_result
+
+        # TODO : cls -> json mapping
+        if self.class_dict:
+            cls = self.class_dict[str(cls)]
+        return gradcam_result,prob,cls
         
 if __name__ == "__main__":
     import cv2
@@ -88,4 +87,4 @@ if __name__ == "__main__":
     image_path = r"C:\Users\201721360\PythonWork\pytorch_serving\example.jpg"  # 이미지 경로를 적절히 지정
     image = cv2.resize(cv2.cvtColor(cv2.imread(filename=image_path),cv2.COLOR_BGR2RGB),(224,224))
 
-    pipeline.run_pipeline(image)
+    pipeline.run(image)
