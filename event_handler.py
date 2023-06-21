@@ -106,7 +106,6 @@ def setJson(gui,file_path):
     for key, value in data.items():
         class_dict[key] = value[1]
 
-    print(class_dict)
     gui.gradcam_pipeline.class_dict = class_dict
     gui.load_json_btn.setText('Json 불러오기 [o]')
     
