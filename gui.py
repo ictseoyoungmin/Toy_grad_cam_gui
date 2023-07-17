@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, 
     QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, 
-    QLineEdit,QMessageBox,
+    QLineEdit,QMessageBox,QFrame
 )
 
 from event_handler import *
@@ -26,7 +26,7 @@ class GUI(QWidget):
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         
         self.setGeometry(500, 500, 1240, 500)
-        # self.setWindowTitle('Grad CAM Output GUI')
+        self.setWindowTitle('Grad CAM Output GUI')
         self.setStyleSheet("""
             QWidget {
                 background-color: #262626;
@@ -54,11 +54,36 @@ class GUI(QWidget):
                 border: 1px solid #FFFFFF;
             }
 
+            QFrame#sep {
+                background-color: #FFFFFF;
+                border-right: 20px solid #FFFFFF;
+                margin: 0px 10px;
+            }
+
+
         """)
-        
+            #         QVBoxLayout#contents {
+            #     border-right: 1px solid #FFFFFF;
+            #     padding-right: 20px;
+            # }
         # TODO : title bar
-        vmain_frame = QVBoxLayout(self)
+        
+        # body 
+        qbody_frame = QHBoxLayout(self) 
+        
+        # main contents layout
+        vmain_frame = QVBoxLayout()
         vmain_frame.setContentsMargins(0, 0, 0, 0)
+        vmain_frame.setObjectName('contents')
+        
+        # flugin : 외부 라이브러리 grad-cam, transformers 예정
+        vflugin_frame = QVBoxLayout()
+        vflugin_frame.setContentsMargins(0,0,0,0)
+        vflugin_frame.setObjectName('flugin')
+
+        self.select_gradcam_btn = QPushButton('gradcam 선택',self)
+        self.select_gradcam_btn.clicked.connect(lambda : upload_image(self))
+        
         # title_bar = TitleBar(self)
         # vmain_frame.addWidget(title_bar)
         
@@ -149,11 +174,25 @@ class GUI(QWidget):
         vbox.addLayout(vbox_model)
         vmain_frame.addLayout(vbox)
 
-        self.setLayout(vmain_frame)
+        # flugin layout
+        vflugin_frame.addWidget(self.select_gradcam_btn)
+
+        # Separator line
+        self.separator = QFrame()
+        self.separator.setFrameShape(QFrame.VLine)
+        self.separator.setFrameShadow(QFrame.Raised)
+        self.separator.setObjectName('sep')
+
+        qbody_frame.addLayout(vmain_frame)
+        qbody_frame.addWidget(self.separator)
+        qbody_frame.addLayout(vflugin_frame)
+        self.setLayout(qbody_frame)
+        self.style().polish(self)
         
         # msg box
         self.msg_box = QMessageBox()
         self.msg_box.setGeometry(500, 500, 1240, 500)
+        self.msg_box.setObjectName('msg_box')
         self.msg_box.setStyleSheet("""
             QMessageBox {
                 background-color: #262626;

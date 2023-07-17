@@ -96,7 +96,12 @@ def appliedText(gui):
 def setModelPath(gui,file_path):
     gui.model_load_text.setText(file_path)
     gui.model_path = file_path
-
+    gui.model_load_text.setStyleSheet("""
+        QLineEdit {
+            color: #FFFFFF;
+        }
+    """)
+    
 def setJson(gui,file_path):
     import json
     with open(file_path, 'r') as file:
